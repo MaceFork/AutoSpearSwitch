@@ -5,40 +5,37 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 
 public class AutoSpearClient implements ClientModInitializer {
-    private static final double RANGE_SQ = 6.0 * 6.0;
-    private static final double FALL_MIN = 8.0;
+    private static final double RANGE_SQ = 10.0 * 10.0;
+    private boolean wasNear = false;
 
     @Override
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             ClientPlayerEntity p = client.player;
-            if (p == null || client.world == null || client.currentScreen != null) return;
+            if (p == null || client.world == null) {
+                wasNear = false;
+                return;
+            }
 
             boolean near = false;
             for (PlayerEntity o : client.world.getPlayers()) {
                 if (o != p && p.squaredDistanceTo(o) <= RANGE_SQ) { near = true; break; }
             }
-            if (!near) return;
 
-            if (!p.isOnGround() && p.fallDistance >= FALL_MIN) {
-                select(p, true);
-            } else if (p.isOnGround()) {
-                select(p, false);
+            if (near && !wasNear && client.currentScreen == null) {
+                selectSpear(p);
             }
+            wasNear = near;
         });
     }
 
-    private void select(ClientPlayerEntity p, boolean spear) {
+    private void selectSpear(ClientPlayerEntity p) {
         for (int i = 0; i < 9; i++) {
             ItemStack s = p.getInventory().getStack(i);
-            boolean match = spear
-                ? Registries.ITEM.getId(s.getItem()).getPath().endsWith("_spear")
-                : s.isOf(Items.GOLDEN_APPLE) || s.isOf(Items.ENCHANTED_GOLDEN_APPLE);
-            if (match) {
+            if (Registries.ITEM.getId(s.getItem()).getPath().endsWith("_spear")) {
                 if (p.getInventory().getSelectedSlot() != i) {
                     p.getInventory().setSelectedSlot(i);
                 }
@@ -46,4 +43,4 @@ public class AutoSpearClient implements ClientModInitializer {
             }
         }
     }
-        }
+                    }
