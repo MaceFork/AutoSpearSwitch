@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "autospear",
+  "version": "${version}",
+  "name": "Auto Spear",
+  "description": "Auto-switches to spear when falling near a player, golden apple when on ground.",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.example.autospear.AutoSpearClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.17.0",
+    "minecraft": "1.21.11",
+    "fabric-api": "*"
+  }
+}
